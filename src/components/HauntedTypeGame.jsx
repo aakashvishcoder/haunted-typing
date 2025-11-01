@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-// Halloween word list
 const HALLOWEEN_WORDS = [
   "ghost", "witch", "pumpkin", "broom", "cauldron", "spider", "web", "fang", "moon", "grave",
   "crypt", "skull", "bone", "blood", "curse", "spell", "magic", "banshee", "zombie", "mummy",
@@ -9,7 +8,7 @@ const HALLOWEEN_WORDS = [
   "ghoul", "demon", "devil", "hell", "candy", "trick", "treat", "mask", "costume", "lantern"
 ];
 
-const GAME_DURATION = 30; // seconds
+const GAME_DURATION = 30;
 
 const HauntedTypeGame = () => {
   const [words, setWords] = useState([]);
@@ -24,7 +23,6 @@ const HauntedTypeGame = () => {
 
   const inputRef = useRef(null);
 
-  // Generate 100 random words
   const generateWords = useCallback(() => {
     return Array.from({ length: 100 }, () =>
       HALLOWEEN_WORDS[Math.floor(Math.random() * HALLOWEEN_WORDS.length)]
@@ -49,7 +47,6 @@ const HauntedTypeGame = () => {
     resetGame();
   }, [resetGame]);
 
-  // Timer logic
   useEffect(() => {
     let timer;
     if (gameActive && timeLeft > 0) {
@@ -73,7 +70,6 @@ const HauntedTypeGame = () => {
     const currentWord = words[currentWordIndex];
     const typedChars = value.split('');
 
-    // Track errors in current word
     const newErrors = [];
     for (let i = 0; i < typedChars.length; i++) {
       if (typedChars[i] !== currentWord[i]) {
@@ -82,7 +78,6 @@ const HauntedTypeGame = () => {
     }
     setErrors(newErrors);
 
-    // Move to next word on space
     if (value.endsWith(' ')) {
       setInput('');
       setCurrentWordIndex(prev => prev + 1);
@@ -92,7 +87,6 @@ const HauntedTypeGame = () => {
     }
   };
 
-  // Calculate stats
   const totalTyped = words
     .slice(0, currentWordIndex)
     .reduce((sum, word) => sum + word.length, 0) + input.length;
@@ -174,7 +168,6 @@ const HauntedTypeGame = () => {
             })}
           </div>
         ) : (
-          // Results Screen
           <div className="text-center py-8">
             <h2 className="text-2xl font-bold text-amber-400 mb-2">🪦 Test Complete!</h2>
             <p className="text-lg mb-1">WPM: <span className="font-bold text-white">{wpm}</span></p>
