@@ -1,6 +1,7 @@
-import HauntedTypingTest from "./components/HauntedTypingTest";
+import HauntedTypeGame from './components/HauntedTypeGame';
+
 function App () {
-  return <HauntedTypingTest />;
+  return <HauntedTypeGame />;
 }
 
 export default App;
