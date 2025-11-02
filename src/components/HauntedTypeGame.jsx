@@ -96,7 +96,10 @@ const HauntedTypeGame = () => {
   const wpm = timeElapsed > 0 ? Math.round((correctChars / 5) / (timeElapsed / 60)) : 0;
 
   return (
-    <div className="relative min-h-screen bg-gray-900 text-gray-200 flex flex-col items-center justify-center p-4 font-mono">
+    <div 
+      className="relative min-h-screen bg-gray-900 text-gray-200 flex flex-col items-center justify-center p-4"
+      style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}
+    >
       {/* Floating ghosts */}
       {[...Array(5)].map((_, i) => (
         <span
