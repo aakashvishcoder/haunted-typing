@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { HALLOWEEN_PASSAGES } from '../lib/passages';
 
-const GAME_DURATION = 10; 
+const GAME_DURATION = 10;
+
 const HauntedTypeGame = () => {
-  const [passage, setPassage] = useState('');
+  const [passages, setPassages] = useState('');
   const [input, setInput] = useState('');
   const [errors, setErrors] = useState([]);
   const [gameActive, setGameActive] = useState(false);
@@ -15,7 +16,7 @@ const HauntedTypeGame = () => {
 
   const resetGame = useCallback(() => {
     const randomPassage = HALLOWEEN_PASSAGES[Math.floor(Math.random() * HALLOWEEN_PASSAGES.length)];
-    setPassage(randomPassage);
+    setPassages(randomPassage);
     setInput('');
     setErrors([]);
     setGameActive(false);
@@ -33,11 +34,7 @@ const HauntedTypeGame = () => {
     let timer;
     if (gameActive && timeLeft > 0) {
       timer = setTimeout(() => setTimeLeft(t => t - 1), 1000);
-    } else if (timeLeft === 0 && gameActive) {
-      setGameActive(false);
-      setGameFinished(true);
     }
-    return () => clearTimeout(timer);
   }, [gameActive, timeLeft]);
 
   const handleInputChange = (e) => {
@@ -77,9 +74,9 @@ const HauntedTypeGame = () => {
             className="absolute text-4xl opacity-10 animate-drift"
             style={{
               left: `${-20 + (i % 4) * 25}%`,
-              top: `${-10 - (i * 15)}%`,
+              top: `${-10 - (i % 15)}%`,
               animationDelay: `${i * 1.2}s`,
-              animationDuration: `${20 + i * 3}s`,
+              animationDuration: `${20 + i * 3}s`,  
             }}
           >
             👻
@@ -91,11 +88,9 @@ const HauntedTypeGame = () => {
         <div className="flex justify-between items-center mb-6 text-sm">
           <div className="flex gap-4">
             <span><span className="text-amber-400 font-bold">{wpm}</span> WPM</span>
-            <span>
-              <span className={accuracy >= 90 ? 'text-emerald-400' : accuracy >= 75 ? 'text-amber-400' : 'text-rose-400'}>
-                {accuracy}%
-              </span> Accuracy
-            </span>
+            <span className={accuracy >= 90 ? 'text-emerald-400' : accuracy >= 75 ? 'text-amber-400' : 'text-rose-400'}>
+              {accuracy}%
+            </span> Accuracy
           </div>
           <div className="text-purple-400 font-mono">{timeLeft}s</div>
         </div>
@@ -116,7 +111,7 @@ const HauntedTypeGame = () => {
               );
             })}
           </div>
-        ) : (
+        ):(
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold text-amber-400 mb-4">🪦 Haunting Complete!</h2>
             <p className="text-lg mb-2">WPM: <span className="font-bold text-white">{wpm}</span></p>
