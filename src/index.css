@@ -7,7 +7,6 @@ body {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 
-/* Diagonal ghost drift animation */
 @keyframes drift {
   0% {
     transform: translate(0, 0);
@@ -18,5 +17,14 @@ body {
 }
 .animate-drift {
   animation: drift linear infinite;
+  will-change: transform;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(100px, 100vh); }
+}
+.animate-float {
+  animation: float linear infinite;
   will-change: transform;
 }
