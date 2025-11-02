@@ -3,27 +3,20 @@
 @tailwind utilities;
 
 body {
-  background: #0a0515;
+  background: #0a0500;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
+
 @keyframes drift {
   0% {
-    transform: translate(0, 0);
+    transform: translate(-100px, -100px);
   }
   100% {
-    transform: translate(120px, 100vh);
+    transform: translate(calc(100vw + 100px), calc(100vh + 100px));
   }
 }
+
 .animate-drift {
   animation: drift linear infinite;
-  will-change: transform;
-}
-
-@keyframes float {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(100px, 100vh); }
-}
-.animate-float {
-  animation: float linear infinite;
   will-change: transform;
 }

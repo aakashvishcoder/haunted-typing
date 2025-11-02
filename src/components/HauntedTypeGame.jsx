@@ -20,6 +20,7 @@ const HauntedTypeGame = () => {
   const [gameFinished, setGameFinished] = useState(false);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [startTime, setStartTime] = useState(null);
+  const [wpmHistory, setWpmHistory] = useState([]);
 
   const inputRef = useRef(null);
 
@@ -36,6 +37,7 @@ const HauntedTypeGame = () => {
     setCurrentWordIndex(0);
     setCurrentCharIndex(0);
     setErrors([]);
+    setWpmHistory([]);
     setGameActive(false);
     setGameFinished(false);
     setTimeLeft(GAME_DURATION);
@@ -50,13 +52,35 @@ const HauntedTypeGame = () => {
   useEffect(() => {
     let timer;
     if (gameActive && timeLeft > 0) {
-      timer = setTimeout(() => setTimeLeft(t => t - 1), 1000);
-    } else if (timeLeft === 0 && gameActive) {
-      setGameActive(false);
-      setGameFinished(true);
+      timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setGameActive(false);
+            setGameFinished(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
-    return () => clearTimeout(timer);
+    return () => clearInterval(timer);
   }, [gameActive, timeLeft]);
+
+  useEffect(() => {
+    if (!gameActive || !startTime) return;
+
+    const interval = setInterval(() => {
+      const totalTypedNow = words
+        .slice(0, currentWordIndex)
+        .reduce((sum, word) => sum + word.length, 0) + input.length;
+      const correctCharsNow = totalTypedNow - errors.length;
+      const elapsedSec = (Date.now() - startTime) / 1000;
+      const wpmNow = elapsedSec > 0 ? Math.round((correctCharsNow / 5) / (elapsedSec / 60)) : 0;
+      setWpmHistory(prev => [...prev, wpmNow]);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [gameActive, startTime, currentWordIndex, input.length, errors, words]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -76,7 +100,7 @@ const HauntedTypeGame = () => {
         newErrors.push(i);
       }
     }
-    setErrors(newErrors); // 🔴 Fixed: was `setErrors(errors)`
+    setErrors(newErrors);
 
     if (value.endsWith(' ')) {
       setInput('');
@@ -95,7 +119,6 @@ const HauntedTypeGame = () => {
   const timeElapsed = startTime ? (Date.now() - startTime) / 1000 : GAME_DURATION - timeLeft;
   const wpm = timeElapsed > 0 ? Math.round((correctChars / 5) / (timeElapsed / 60)) : 0;
 
-  // ✅ Fixed: Group words into lines of 8
   const groupedWords = [];
   for (let i = 0; i < words.length; i += 8) {
     groupedWords.push(words.slice(i, i + 8));
@@ -106,26 +129,8 @@ const HauntedTypeGame = () => {
       className="relative min-h-screen bg-[#0a0500] text-amber-100 flex flex-col"
       style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}
     >
-      {/* Diagonally drifting ghosts */}
-      {[...Array(10)].map((_, i) => (
-        <span
-          key={i}
-          className="absolute text-3xl opacity-10 animate-drift pointer-events-none"
-          style={{
-            left: `${-20 + (i % 4) * 30}%`,
-            top: `${-10 - i * 12}%`,
-            animationDelay: `${i * 1.2}s`,
-            animationDuration: `${22 + i * 3}s`,
-          }}
-        >
-          👻
-        </span>
-      ))}
-
-      {/* Centered Content */}
       <div className="flex flex-col flex-grow items-center justify-center px-4 pb-16 pt-8">
         <div className="w-full max-w-3xl">
-          {/* Stats Bar — Orange Themed */}
           <div className="flex justify-between text-sm mb-6 text-amber-300/80">
             <div><span className="text-orange-400 font-bold">{wpm}</span> WPM</div>
             <div>
@@ -136,7 +141,6 @@ const HauntedTypeGame = () => {
             <div><span className="text-amber-500">{timeLeft}s</span></div>
           </div>
 
-          {/* Words Area */}
           {!gameFinished ? (
             <div className="mb-6 p-6 bg-[rgba(20,10,0,0.4)] backdrop-blur rounded-xl border border-amber-900/30">
               {groupedWords.map((line, lineIndex) => (
@@ -180,28 +184,51 @@ const HauntedTypeGame = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <h2 className="text-2xl font-bold text-orange-400 mb-2">🪦 Test Complete!</h2>
+            <div className="text-center py-6">
+              <h2 className="text-2xl font-bold text-orange-400 mb-4">🪦 Haunting Complete!</h2>
               <p className="text-lg mb-1">WPM: <span className="font-bold text-amber-100">{wpm}</span></p>
               <p className="text-lg mb-4">Accuracy: <span className="font-bold">{accuracy}%</span></p>
+
+              {/* 📊 Graph appears after game ends */}
+              {wpmHistory.length > 0 && (
+                <div className="mb-6 p-4 bg-[rgba(20,10,0,0.4)] rounded-lg border border-amber-900/30">
+                  <h3 className="text-amber-300 mb-2 text-sm">WPM Over Time</h3>
+                  <div className="flex items-end h-24 gap-1 justify-center px-2">
+                    {wpmHistory.map((wpmVal, i) => {
+                      const max = Math.max(...wpmHistory);
+                      const height = max > 0 ? (wpmVal / max) * 100 : 0;
+                      return (
+                        <div
+                          key={i}
+                          className="w-2 bg-amber-500 rounded-t"
+                          style={{ height: `${height}%`, minHeight: '2px' }}
+                        />
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-amber-600 mt-2">
+                    Test duration: {wpmHistory.length}s • Peak: {Math.max(...wpmHistory)} WPM
+                  </p>
+                </div>
+              )}
+
               <button
                 onClick={resetGame}
-                className="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition transform hover:scale-105 shadow-lg"
+                className="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition transform hover:scale-105"
               >
-                👻 Summon New Test
+                👻 New Test
               </button>
             </div>
           )}
 
-          {/* Input Field — Orange Border */}
           {!gameFinished && (
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={handleInputChange}
-              disabled={timeLeft === 0}
-              placeholder={gameActive ? '' : 'Begin your incantation...'}
+              disabled={timeLeft <= 0}
+              placeholder={gameActive ? '' : 'Type to begin...'}
               className="w-full p-4 text-lg bg-[rgba(10,5,0,0.6)] border border-orange-700/50 rounded-lg text-amber-100 placeholder-amber-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               autoFocus
             />
@@ -209,9 +236,8 @@ const HauntedTypeGame = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="py-3 text-center text-sm text-amber-700/80 border-t border-amber-900/20 bg-[rgba(10,5,0,0.7)] backdrop-blur">
-        🎃 Made for Hack Club's Siege • Beware the typing spirits 👻
+      <footer className="py-3 text-center text-sm text-amber-700/80 border-t border-amber-900/20 bg-[rgba(10,5,0,0.7)]">
+        🎃 Made for Hack Club's Siege
       </footer>
     </div>
   );
