@@ -6,13 +6,12 @@ body {
   background: #0a0515;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
-
 @keyframes drift {
   0% {
     transform: translate(0, 0);
   }
   100% {
-    transform: translate(100px, 100vh);
+    transform: translate(120px, 100vh);
   }
 }
 .animate-drift {
