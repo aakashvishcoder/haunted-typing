@@ -237,7 +237,7 @@ const HauntedTypeGame = () => {
       </div>
 
       <footer className="py-3 text-center text-sm text-amber-700/80 border-t border-amber-900/20 bg-[rgba(10,5,0,0.7)]">
-        🎃 Made for Hack Club's Siege
+        🎃 Haunted Typing Game
       </footer>
     </div>
   );
